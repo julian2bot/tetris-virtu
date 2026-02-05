@@ -112,60 +112,10 @@ volumes:
 
 ## QUESTION 7 - Quelles précaution sont nécessaires pour assurer que tous les clients observent les mêmes données (la valeur du record)?
 
-Pour que tous les clients voient la même valeur du record, tous les backends doivent utiliser le même service Redis unique avec un stockage persistant.
 
 
-## QUESTION 8 - Assurer les contraintes de la question précédente via le fichier docker-stack.yml.
 
 
-nouveau `docker-stack.yml`
-```yml
-
-version: "3.8"
-
-services:
-  frontend:
-    image: terramino-frontend:latest
-    ports:
-      - "8081:8081"
-    deploy:
-      replicas: 3                 # 3 répliques du frontend comme demandé
-      restart_policy:
-        condition: on-failure
-
-  backend:
-    image: terramino-backend:latest
-    environment:
-      REDIS_HOST: redis            # Tous les backends pointent vers le même Redis
-      REDIS_PORT: 6379
-      TERRAMINO_PORT: 8080
-    ports:
-      - "8080:8080"
-    deploy:
-      replicas: 2                 # 2 répliques du backend
-      restart_policy:
-        condition: on-failure
-
-  redis:
-    image: redis:alpine
-    volumes:
-      - redis_data:/data           # Volume persistant pour conserver le record
-    deploy:
-      replicas: 1                 # UNE seule réplique pour garantir l’unicité des données
-      restart_policy:
-        condition: on-failure
-
-volumes:
-  redis_data:                      # Volume partagé pour Redis
-
-```
-
-## QUESTION 9 - 
-La robustesse est vérifiée en arrêtant successivement chaque conteneur avec :
-
-```bash
-docker service scale terramino_backend=0
-```
 
 
 
