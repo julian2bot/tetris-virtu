@@ -192,6 +192,7 @@ La robustesse est vérifiée en arrêtant successivement chaque conteneur avec :
 docker service scale terramino_backend=0
 ```
 
+# 3 Approfondissements
 
 ## QUESTION 10 - Passer le nombre de répliques du frontend de 3 à 5.
 Dans le docker `docker-stack.yml`
