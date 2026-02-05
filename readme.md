@@ -44,6 +44,8 @@ scp backend.tar frontend.tar o22302184@172.16.0.244:/home/user/
 
 scp -J o22302184@acces-tp.iut45.univ-orleans.fr o22302184@o22302184-244:~/tuerNgyen/terramino-go . terramino-go-frontend.tar
 
+
+
 puis copier sur les autres vm (mais je suis pas sur les vm donc tkt ca fonctionne)
 
 puis exacuter pour chaque VM:
