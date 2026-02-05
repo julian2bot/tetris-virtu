@@ -39,8 +39,8 @@ docker save terramino-go-backend:latest -o backend.tar
 
 
 
-scp backend.tar frontend.tar o22302184@172.16.0.244:/home/user/
-
+scp backend.tar frontend.tar o22302184@172.16.0.242:
+scp backend.tar frontend.tar o22302184@172.16.0.243:
 
 scp -J o22302184@acces-tp.iut45.univ-orleans.fr o22302184@o22302184-244:~/tuerNgyen/terramino-go . terramino-go-frontend.tar
 
@@ -59,8 +59,31 @@ docker load < frontend.tar
 ## QUESTION 5 - Déployer la stack décrite ci-dessus
 Executer la commande:
 ```bash
+docker swarm init
+
+
 docker stack deploy -c docker-stack.yml terramino
 ```
+
+swarn init:
+```bash
+o22302184@o22302184-244:~/tuerNgyen/terramino-go$ docker swarm init
+Swarm initialized: current node (uiswqp0gqtsym8j704k5251rt) is now a manager.
+
+To add a worker to this swarm, run the following command:
+
+    docker swarm join --token SWMTKN-1-3qebx4ciyobiy2954l4f2py5l3svp4ai8d0a4b4vr2yeme12pt-bnltfl91dz28lgdoyyp6xz0g1 172.16.0.244:2377
+
+To add a manager to this swarm, run 'docker swarm join-token manager' and follow the instructions.
+o22302184@o22302184-244:~/tuerNgyen/terramino-go$ 
+```
+
+sur les autres VM executer la commande donnée:
+```bash
+docker swarm join --token SWMTKN-1-3qebx4ciyobiy2954l4f2py5l3svp4ai8d0a4b4vr2yeme12pt-bnltfl91dz28lgdoyyp6xz0g1 172.16.0.244:2377
+
+``` 
+
 
 Vérif du deploiement:
 ```bash
@@ -162,12 +185,53 @@ volumes:
 
 ```
 
-## QUESTION 9 - 
-La robustesse est vérifiée en arrêtant successivement chaque conteneur avec :
+## QUESTION 9 - Vérifiez que votre solution est robuste en cas d’arrêt de chacun des conteneurs de la stack.  Comment assurer que la valeur du record est préservée?
 
+La robustesse est vérifiée en arrêtant successivement chaque conteneur avec :
 ```bash
 docker service scale terramino_backend=0
 ```
+
+
+## QUESTION 10 - Passer le nombre de répliques du frontend de 3 à 5.
+Dans le docker `docker-stack.yml`
+```yml
+deploy:
+  replicas: 5
+```
+Puis redeployer la stack
+
+
+## QUESTION 11 - Parmi les ports exposés dans la version compose fournie au départ, lesquels ont vraiment besoin d’être accessibles depuis la machine hôte dans la version swarm? Le cas échéant, modifier le fichier yaml décrivant la stack pour minimiser les ports exposés à la machine hôte.
+
+Le port vraiment utile:
+- le frontend a besoin du port 8081
+
+Les ports plus utiles sont :
+- Le back a besoin du port 8080
+- Redis a besoin du port 6879 
+
+## QUESTION 12 - Proposer et mettre en place une solution pour répliquer aussi le service redis.
+
+
+Une solution consiste à utiliser Redis Sentinel ou un cluster Redis.
+
+Soit:
+- Déployer plusieurs services redis
+- Utiliser un mécanisme de master/slave avec réplication
+
+Cela permet une tolérance aux pannes, mais c'est plus complexe. La configuration est définie via des variables d’environnement et des fichiers de config redis
+
+
+
+## QUESTION 13 - Utiliser une construction échelonnée pour minimiser la place occupée par l’image backend. Combien de place économise-t-on ainsi?
+
+
+En utilisant une construction échelonnée pour le backend, on compile les binaires Go dans une image golang puis on les copie dans une image finale minimale (scratch) ; la taille de l’image passe d’environ 300 Mo à 15 Mo, soit un gain d’environ 285 Mo, mesuré à l’aide de la commande docker images.
+
+
+
+
 
 
 
